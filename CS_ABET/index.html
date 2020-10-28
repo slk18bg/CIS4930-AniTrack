@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-route.js"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+    <script src="app.js"></script>
+</head>
+<body style="background-color:floralwhite">
+    <style>
+        .button {
+            background-color: white;
+            border: none;
+            color: black;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .button-bordered {
+            background-color: white;
+            border:thin;
+            color: black;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .menu-item {
+            cursor: default;
+        }
+    </style>
+    <div ng-app="AnimeTracker" ng-controller="mainCtrl">
+        <h1 style="color:cornflowerblue; font-family:Lucida Sans Unicode;font-size:40px;margin-bottom:1px;text-align:center">Welcome to AniTrack!</h1>
+        <h2 style="color:darkblue; margin-top:2px;font-family:Lucida Sans Unicode;font-size:30px;text-align:center">Keep track of the animes you watched sorted by genres.</h2>
+
+        <div style="border-bottom:dotted; color:cornflowerblue">
+
+            <div ng-repeat="genre in genres | orderBy: 'Name'"> <!--to have genres display alphabetically-->
+                <div style="float:left;margin:15px;padding:3px;color:black;font-family:Lucida Sans Unicode">
+                    <!-- I have changed the position of the ng- click to selecte the genre and I added the edit button below-->
+                    <button ng-click="showEditGenre(genre)" class="button" style="float:left;margin-left:5px;margin-top:3px;padding:0px"><i class="fas fa-edit" style="color:darkblue">&nbsp;&nbsp;</i></button>
+                    <div ng-click="selectGenre(genre)" class="menu-item" style="float:left;margin-right:5px">{{genre.Name}}</div>
+                    <button class="button" style="float:left;margin-left:5px;margin-top:3px;padding:0px" ng-click="removeGenre(genre.Id)"><i class="fas fa-window-close" style="color:darkblue"></i></button>
+                </div>
+            </div>
+
+            <div ng-click="showNewGenre()" style="float:left;margin:15px;padding:3px">
+                <button class="button" style="float:left;margin-left:5px;margin-top:3px;padding:0px"><i class="fas fa-plus-square" style="color:darkblue"></i></button>
+            </div>
+
+        </div>
+
+        <div style="clear:both"></div>
+        <div ng-show="!addingGenre && selectedGenre !== undefined && !editingGenre">
+
+            <!-- added editingGenre boolea above-->
+            <div style="float:left;width:40%">
+                <div style="width:100%;display:table-row" ng-repeat="title in titles | filter:{GenreId : selectedGenre.Id } | orderBy: 'TitleName'" ng-show="selectedGenre !== undefined">
+                    <!-- added editingClass button below-->
+                    <button ng-click="showEditTitle(title)" class="button" style="float:left;margin-left:5px;margin-top:3px;padding:0px"><i class="fas fa-edit" style="color:darkblue">&nbsp;&nbsp;</i></button>
+                    <div ng-click="selectTitle(title)" style="float:left;margin:15px;font-family:Lucida Sans Unicode">{{title.TitleName}}</div>
+                    <button class="button" style="float:left;margin-left:5px;margin-top:15px;padding:0px" ng-click="removeTitle(title.Id)"><i class="fas fa-window-close" style="color:darkblue">&nbsp;&nbsp;</i></button>
+                </div>
+                <div style="width:100%;display:table-row">
+                    <button class="button" style="height:25px;width:50px;margin:0px 15px 15px 0px;padding:0px" ng-click="showNewTitle()"><i class="fas fa-plus-square" style="color:darkblue">&nbsp;&nbsp;</i></button>
+                </div>
+            </div>
+
+            <!-- added editingClass boolean below-->
+            <div style="float:left;width:60%;margin-top:15px;font-family:Lucida Sans Unicode" ng-show="selectedTitle !== undefined && !addingTitle && !editingTitle">
+                <div style="margin:5px;font-family:Lucida Sans Unicode"><b>Total Episodes:</b> {{selectedTitle.Episodes}}</div>
+                <div style="margin:5px;font-family:Lucida Sans Unicode"><b>Year Released:</b> {{selectedTitle.YearReleased}}</div>
+                <div style="margin:5px;font-family:Lucida Sans Unicode"><b>Average Rating:</b> {{selectedTitle.AverageRating}}</div>
+            </div>
+
+
+            <div style="float:left;width:60%;margin-top:15px" ng-show="addingTitle">
+
+                <div style="display:table-row;margin-top:10px">
+                    <label style="width:30%;font-family:Lucida Sans Unicode" for="name">Anime Title:</label>
+                    <input style="width:100%" id="name" ng-model="selectedTitle.TitleName" />
+                </div>
+                <div style="display:table-row;margin-top:10px">
+                    <label style="width:30%;font-family:Lucida Sans Unicode" for="episodes">Total Episodes:</label>
+                    <input style="width:100%" id="episodes" ng-model="selectedTitle.Episodes" />
+                </div>
+                <div style="display:table-row;margin-top:10px">
+                    <label style="width:30%;font-family:Lucida Sans Unicode" for="year">Year Released:</label>
+                    <input style="width:100%" id="year" ng-model="selectedTitle.YearReleased" />
+                </div>
+                <div style="display:table-row;margin-top:10px">
+                    <label style="width:30%;font-family:Lucida Sans Unicode" for="rating">Average Rating:</label>
+                    <input style="width:100%" id="rating" ng-model="selectedTitle.AverageRating" />
+                </div>
+                <div style="display:table-row;margin-top:15px">
+                    <div style="float: right">
+                        <button class="button-bordered" ng-click="cancelAddTitle()">Cancel</button>
+                        <button class="button-bordered" style="padding:15px 0px 15px 15px" ng-click="addTitle()">Ok</button>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- added all this div below to edit Class-->
+            <div style="float:left;width:60%;margin-top:15px" ng-show="editingTitle">
+
+                <div style="display: table-row; margin-top: 10px">
+                    <label style="width:30%" for="name">Anime Title:</label>
+                    <input style="width:100%" id="name" ng-model="selectedEditingTitle.TitleName" />
+                </div>
+                <div style="display: table-row; margin-top: 10px">
+                    <label style="width:30%" for="episodes">Total Episodes:</label>
+                    <input style="width:100%" id="episodes" ng-model="selectedEditingTitle.Episodes" />
+                </div>
+                <div style="display:table-row;margin-top:10px">
+                    <label style="width:30%" for="year">Year Released:</label>
+                    <input style="width:100%" id="year" ng-model="selectedEditingTitle.YearReleased" />
+                </div>
+                <!--added in this portion to display the average rating-->
+                <div style="display:table-row;margin-top:10px">
+                    <label style="width:30%" for="rating">Average Rating:</label>
+                    <input style="width:100%" id="rating" ng-model="selectedEditingTitle.AverageRating" />
+                </div>
+                <div style="display:table-row;margin-top:15px">
+                    <div style="float:right">
+                        <button class="button-bordered" ng-click="cancelEditTitle()">Cancel</button>
+                        <button class="button-bordered" style="padding:15px 0px 15px 15px" ng-click="updateTitle()">Ok</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <div ng-show="addingGenre" style="width:30%">
+            <label for="name">Genre:</label>
+            <input id="name" ng-model="selectedGenre.Name" />
+            <div style="clear:both"></div>
+            <div style="float:right">
+                <button class="button-bordered" ng-click="cancelAddGenre()">Cancel</button>
+                <button class="button-bordered" ng-click="addGenre()">Ok</button>
+            </div>
+        </div>
+
+
+        <!-- added all this div below to edit genre-->
+        <div ng-show="editingGenre" style="width:30%">
+            <label for="name">Genre:</label>
+            <input id="name" ng-model="selectedEditingGenre.Name" />
+            <div style="clear:both"></div>
+            <div style="float:right">
+                <button class="button-bordered" ng-click="cancelEditGenre()">Cancel</button>
+                <button class="button-bordered" ng-click="updateGenre()">Ok</button>
+            </div>
+        </div>
+        <!--<div class="ng-view"></div>-->
+
+
+    </div>
+</body>
+</html>
